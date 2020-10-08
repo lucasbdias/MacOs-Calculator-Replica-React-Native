@@ -13,6 +13,7 @@ export const CalculatorContainer = styled.View`
   background: ${color.background};
   width: 100%;
   border-radius: 15px;
+  overflow: hidden;
 `;
 
 export const TopBar = styled.View`
@@ -29,13 +30,15 @@ export const Bullet = styled.TouchableOpacity`
 
 export const ResultContainer = styled.View`
   align-items: flex-end;
+  flex-wrap: nowrap;
+  min-height: 80px;
 `;
 
 export const ResultText = styled.Text`
   color: #fff;
   font-family: Poppins-Thin;
-  font-size: 60px;
-  margin-right: 15px;
+  font-size: ${props => props.fontSize < 30 ? 30 : props.fontSize}px;
+  margin: 30px 15px;
   margin-bottom: 5px;
 `;
 

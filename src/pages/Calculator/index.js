@@ -11,17 +11,23 @@ import {
   Row
 } from './styles';
 
-import color from '../../styles/colors'
+import color from '../../styles/colors';
 
 import Button from "../../components/Button";
 
 const Calculator = () => {
   const [display, setDisplay] = useState('0');
   const [operationValues, setOperationValues] = useState([]);
+  const [clear, setClear] = useState('AC');
+  const [resultFontSize, setResultFontSize] = useState(60);
   
   const handleDisplay = (character, action) => {
     if (action === 'digit') {
       setDisplay(oldValue => {
+        if (oldValue !== 0) {
+          setClear('C');
+        } 
+
         if (operationValues.length === 2) {
           setDisplay(character);
           setOperationValues([...operationValues, character])
@@ -31,7 +37,9 @@ const Calculator = () => {
         }
         if(operationValues[0] === display) {
           setDisplay(character);
-          setOperationValues([...operationValues, character])
+          if (character !== ',') {
+            setOperationValues([...operationValues, character])
+          }
         }
         if (character === ',') {
           if (!oldValue.includes('.')) {
@@ -62,13 +70,47 @@ const Calculator = () => {
       })
     }
     else if (action === 'operator') {
-      // alert(operationValues);
       if (operationValues.length === 0 || operationValues.length === 1) {
         setOperationValues([display, character]);
       }
             
+      if (operationValues.length === 3) {
+        let operation;
+        switch (operationValues[1]) {
+          case '+':
+            operation = Number(operationValues[0]) + Number(operationValues[2]);
+            setDisplay(String(operation));
+            setOperationValues([String(operation), operationValues[1]]);
+          break;
+          case '-':
+            operation = Number(operationValues[0]) - Number(operationValues[2]);
+            setDisplay(String(operation));
+            setOperationValues([String(operation), operationValues[1]]);
+          break;
+          case 'x':
+            operation = Number(operationValues[0]) * Number(operationValues[2]);
+            setDisplay(String(operation));
+            setOperationValues([String(operation), operationValues[1]]);
+          break;
+          case '÷':
+            if (Number(operationValues[2]) === 0) {
+              setDisplay('Not a number');
+            } else {
+              operation = Number(operationValues[0]) / Number(operationValues[2]);
+              setDisplay(String(operation));
+              setOperationValues([String(operation), operationValues[1]]);
+            }
+          break;
+          case '%':
+            let operation = Number(operationValues[0]) / 100 * operationValues[2];
+            setDisplay(String(operation));
+            setOperationValues([String(operation), operationValues[1]]);
+          break;
+        }
+      }
       if (character === '=' && operationValues.length === 3) {
-        let operation
+        let operation;
+        setClear('AC');
         switch (operationValues[1]) {
           case '+':
             operation = Number(operationValues[0]) + Number(operationValues[2]);
@@ -94,20 +136,23 @@ const Calculator = () => {
               setOperationValues([String(operation)]);
             }
           break;
-        }
-      } else if (character === '=' && operationValues.length === 2) {
-        if (operationValues[1] === '%') {
-          let operation = Number(operationValues[0]) / 100;
-          setDisplay(String(operation));
-          setOperationValues([String(operation)]);
+          case '%':
+            let operation = Number(operationValues[0]) / 100 * operationValues[2];
+            setDisplay(String(operation));
+            setOperationValues([String(operation)]);
+          break;
         }
       }
     }
   };
 
   useEffect(() => {
-    // if (type ===)
-  }, [operationValues]);
+    if (display.length > 8) {
+      setResultFontSize(oldFontSize => oldFontSize - (display.length - 8) * 5)
+    } else {
+      setResultFontSize(60);
+    }
+  }, [display]);
 
   return (
     <Container>
@@ -120,7 +165,7 @@ const Calculator = () => {
           <Bullet color={color.green} />
         </TopBar>
         <ResultContainer>
-        <ResultText>{display}</ResultText>
+          <ResultText fontSize={resultFontSize} numberOfLines={1} ellipsizeMode='head'>{display}</ResultText>
         </ResultContainer>
         <Wrapper>
             <Row>
@@ -128,7 +173,7 @@ const Calculator = () => {
                 type={'clear'}
                 color={color.dark_gray}
                 flex={1}
-                character={'AC'}
+                character={clear}
                 handleDisplay={handleDisplay}
               />
               <Button
